@@ -1,95 +1,56 @@
 package stepDefinitions;
 
-
-import io.cucumber.java.Before;
+import base.BaseTest;
+import com.aventstack.extentreports.Status;
 import io.cucumber.java.en.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import static base.BaseTest.driver;
-
+import org.testng.Assert;
+import pages.CalculatorPage;
 
 public class CalculatorSteps {
 
- 
-    @Before
-    public void resetCalculator() {
-        try {
-            driver.findElement(By.id("com.miui.calculator:id/btn_c_s")).click();
-            Thread.sleep(300);
-        } catch (Exception ignored) {}
-    }
+    CalculatorPage calculator;
 
     @Given("I open the calculator app")
-    public void opencalculator_app() {
-        // already opened from BaseTest
+    public void openCalculatorApp() {
+
+        calculator = new CalculatorPage(BaseTest.getDriver());
+
+        Hooks.getTest().log(Status.INFO, "Given I open the calculator app");
+
+        calculator.clearCalculator();
     }
 
     @When("I enter {string}")
-    public void enterfirst_number(String num1) {
-        tapNumber(num1);
+    public void enterFirstNumber(String number) {
+
+        Hooks.getTest().log(Status.INFO, "When I enter \"" + number + "\"");
+
+        calculator.tapNumber(number);
     }
 
     @And("I perform {string} with {string}")
-    public void press_operator(String operator,String num2) {
+    public void pressOperator(String operator, String secondNumber) {
 
-        switch (operator.toLowerCase()) {
-            case "add":
-                tap(By.id("com.miui.calculator:id/btn_plus_s"));
-                tapNumber(num2);
-                break;
-            case "subtract":
-                tap(By.id("com.miui.calculator:id/btn_minus_s"));
-                tapNumber(num2);
-                break;
-            case "multiply":
-                tap(By.id("com.miui.calculator:id/btn_mul_s"));
-                tapNumber(num2);
-                break;
-            case "divide":
-                tap(By.id("com.miui.calculator:id/btn_div_s"));
-                tapNumber(num2);
-                break;
-            case "percent":
-            	tap(By.id("com.miui.calculator:id/btn_percent_s"));
-            	break;
-            default:
-                throw new IllegalArgumentException("Invalid operator: " + operator);
+        Hooks.getTest().log(Status.INFO,
+                "And I perform \"" + operator + "\" with \"" + secondNumber + "\"");
+
+        calculator.tapOperator(operator);
+
+        if (!secondNumber.equalsIgnoreCase("NA")) {
+            calculator.tapNumber(secondNumber);
         }
 
-      //  tapNumber(secondNumber);
+        calculator.tapEqual();
     }
 
     @Then("I should see {string} on the screen")
-    public void result(String expected) {
+    public void verifyResult(String expected) {
 
-        tap(By.id("com.miui.calculator:id/btn_equal_s"));        
-        WebElement result = driver.findElement(By.id("com.miui.calculator:id/result"));
+        Hooks.getTest().log(Status.INFO,
+                "Then I should see \"" + expected + "\" on the screen");
 
-        String actual = result.getText()
-                .replace("=", "")
-                .replace(",", "")
-                .trim();
+        String actual = calculator.getResult();
 
-        if (!actual.equals(expected)) {
-            throw new AssertionError("Expected: " + expected + " but got: " + actual);
-        }
-    }
-
-    private void tapNumber(String number) {
-        if (number == null || number.equalsIgnoreCase("NA")) {
-            return;
-        }
-        for (char digit : number.toCharArray()) {
-            tap(By.id("com.miui.calculator:id/btn_" + digit + "_s"));
-        }
-    }
-
-
-    private void tap(By locator) {
-        driver.findElement(locator).click();
-        try {
-        	Thread.sleep(250);
-        	}
-        catch (InterruptedException ignored) {}
+        Assert.assertEquals(actual, expected);
     }
 }
