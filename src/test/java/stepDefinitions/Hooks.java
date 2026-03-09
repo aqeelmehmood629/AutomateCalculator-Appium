@@ -6,34 +6,50 @@ import com.aventstack.extentreports.Status;
 
 import io.cucumber.java.*;
 import utils.ExtentManager;
+import utils.ScreenshotUtil;
 
 public class Hooks {
 
-    private static ExtentReports extent = ExtentManager.getExtentReports();
-    private static ThreadLocal<ExtentTest> testThread = new ThreadLocal<>();
+	private static ExtentReports extent = ExtentManager.getExtentReports();
+	private static ThreadLocal<ExtentTest> testThread = new ThreadLocal<>();
 
-    @Before
-    public void beforeScenario(Scenario scenario) throws Exception {
+	@Before
+	public void beforeScenario(Scenario scenario) throws Exception {
 
-        BaseTest.initDriver();
+		BaseTest.initDriver();
 
-        ExtentTest test = extent.createTest(scenario.getName());
-        testThread.set(test);
-    }
+		ExtentTest test = extent.createTest(scenario.getName());
+		testThread.set(test);
+	}
 
-    @After
-    public void afterScenario(Scenario scenario) {
+	@After
+	public void afterScenario(Scenario scenario) {
 
-        if (scenario.isFailed()) {
-            testThread.get().log(Status.FAIL, "Scenario Failed");
-        } else {
-            testThread.get().log(Status.PASS, "Scenario Passed");
-        }
+		String status = scenario.isFailed() ? "FAIL" : "PASS";
 
-        extent.flush();
-    }
+		String screenshotPath = ScreenshotUtil.captureScreenshot(scenario.getName().replace(" ", "_"), status);
 
-    public static ExtentTest getTest() {
-        return testThread.get();
-    }
+		try {
+
+			if (scenario.isFailed()) {
+
+				testThread.get().fail("Scenario Failed").addScreenCaptureFromPath(screenshotPath, "Failure Screenshot");
+
+			} else {
+
+				testThread.get().pass("Scenario Passed").addScreenCaptureFromPath(screenshotPath, "Passed Screenshot");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		extent.flush();
+
+	}
+
+	public static ExtentTest getTest() {
+		return testThread.get();
+	}
+
 }
