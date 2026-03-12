@@ -20,3 +20,8 @@ jobs:
 
       - name: Build Project
         run: mvn clean install -DskipTests
+      - name: Upload Extent Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Extent-Report
+          path: reports/
