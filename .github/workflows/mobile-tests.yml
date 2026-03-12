@@ -25,7 +25,7 @@ jobs:
         run: mkdir -p reports
 
       - name: Run Tests
-        run: mvn test || true
+        run: mvn test
 
       - name: Upload Extent Report
         uses: actions/upload-artifact@v4
