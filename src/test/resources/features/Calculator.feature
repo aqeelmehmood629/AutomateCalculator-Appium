@@ -15,4 +15,4 @@ Examples:
   | 9    | subtract  | 4    | 5      |
   | 60   | multiply  | 5    | 300    |
   | 8    | divide    | 2    | 4      |
-  | 5    | percent   | NA   | 0.5    |
+  | 5    | percent   | NA   | 0.05   |
